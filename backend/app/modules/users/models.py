@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, String
+from sqlalchemy import DateTime, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -14,6 +14,11 @@ class User(Base):
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
+    )
+
+    username: Mapped[str] = mapped_column(
+            String(255),
+            nullable=False,
     )
 
     email: Mapped[str] = mapped_column(
@@ -39,3 +44,10 @@ class User(Base):
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )
+
+    __table_args__ = (
+    UniqueConstraint(
+        "username",
+        name="uq_users_username",
+    ),
+)
