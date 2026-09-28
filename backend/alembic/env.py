@@ -5,8 +5,8 @@ from sqlalchemy import engine_from_config, pool
 
 from app.core.config import settings
 from app.db.base import Base
-from app.modules.users.models import User  # noqa: F401
-
+from app.modules.users.models import User  # noqa:F401
+from app.modules.workspaces.models import Workspace  # noqa: 
 
 config = context.config
 
