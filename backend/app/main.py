@@ -1,7 +1,14 @@
 from fastapi import FastAPI
+from sqlalchemy import text
 
-app = FastAPI()
+from app.db.database import engine
+
+app = FastAPI(title="Personal OS")
+
 
 @app.get("/api/v1/health")
 def health_check():
-    return {"status":"ok"}
+    with engine.connect() as connection:
+        connection.execute(text("SELECT 1"))
+
+    return {"status": "ok"}
