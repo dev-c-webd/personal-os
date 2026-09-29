@@ -1,7 +1,8 @@
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from app.core.security import hash_password
+from app.core.security import hash_password, verify_password, create_access_token
+from app.modules.auth.schemas import LoginRequest
 from app.modules.users.models import User
 from app.modules.auth.schemas import UserRegister
 
@@ -54,3 +55,26 @@ def register_user(data: UserRegister, db: Session) -> User:
     db.refresh(user)
 
     return user
+
+
+def authenticate_user(data: LoginRequest, db: Session) -> User | None:
+
+    user = db.scalar(
+        select(User).where(
+            or_(
+                User.username == data.identifier,
+                User.email == data.identifier,
+            )
+        )
+    )
+
+    if not user:
+        return None
+
+    if not verify_password(data.password, user.password_hash):
+        return None
+
+    return user
+
+def create_login_token(user: User) -> str:
+    return create_access_token(str(user.id))

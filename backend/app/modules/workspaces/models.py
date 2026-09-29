@@ -11,10 +11,10 @@ from app.db.base import Base
 class Workspace(Base):
     __tablename__ = "workspaces"
 
-    id: Mapped[uuid.UUID]=mapped_column(
+    id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
-        nullable=False
+        default=uuid.uuid4,
     )
 
     name:Mapped[str]=mapped_column(
