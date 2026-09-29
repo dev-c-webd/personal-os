@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.modules.users.models import User
@@ -30,3 +33,11 @@ def create_workspace(
     db.refresh(workspace)
 
     return workspace
+
+def get_workspace_by_id(
+    workspace_id: UUID,
+    db: Session,
+) -> Workspace | None:
+    return db.scalar(
+        select(Workspace).where(Workspace.id == workspace_id)
+    )
