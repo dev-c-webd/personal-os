@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.modules.nodes.models import Node
 from app.modules.workspaces.models import Workspace
-from app.modules.nodes.schemas import NodeCreate
+from app.modules.nodes.schemas import NodeCreate, NodeUpdate
 
 def create_node(
     workspace_id: UUID,
@@ -79,3 +79,32 @@ def get_node_by_id(
     )
 
     return db.scalar(statement)
+
+def update_node(
+        workspace_id:UUID,
+        node_id:UUID,
+        data:NodeUpdate,
+        db:Session
+) -> Node | None:
+
+    node = db.scalar(
+        select(Node).where(
+            Node.id == node_id,
+            Node.workspace_id == workspace_id
+        )
+    )
+
+    if node is None:
+        return None
+
+    if data.name is not None:
+        node.name = data.name
+
+    if data.sort_order is not None:
+        node.sort_order = data.sort_order
+
+    db.commit()
+    db.refresh(node)
+
+    return node
+    
