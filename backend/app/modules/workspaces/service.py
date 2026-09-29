@@ -41,3 +41,21 @@ def get_workspace_by_id(
     return db.scalar(
         select(Workspace).where(Workspace.id == workspace_id)
     )
+
+
+def get_user_workspaces(
+        user_id:UUID,
+        db: Session,
+) -> list[Workspace]:
+
+    statement = (
+        select(Workspace)
+        .join(
+            WorkspaceMember,
+            WorkspaceMember.workspace_id == Workspace.id
+        )
+        .where(WorkspaceMember.user_id == user_id,)
+        .order_by(Workspace.created_at)
+    )
+
+    return list(db.scalars(statement).all())

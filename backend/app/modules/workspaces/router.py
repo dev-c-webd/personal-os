@@ -10,6 +10,7 @@ from app.modules.workspaces.dependencies import get_workspace_member
 from app.modules.workspaces.schemas import WorkspaceCreate, WorkspaceResponse
 from app.modules.workspaces.service import (
     create_workspace,
+    get_user_workspaces,
     get_workspace_by_id,
 )
 
@@ -54,3 +55,11 @@ def get_workspace(
         )
 
     return workspace
+
+
+@router.get("", response_model=list[WorkspaceResponse])
+def list_workspaces(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return get_user_workspaces(current_user.id, db)
