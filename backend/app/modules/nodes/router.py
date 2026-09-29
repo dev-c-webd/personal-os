@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.modules.auth.dependencies import get_current_user
 from app.modules.nodes.schemas import NodeCreate, NodeResponse
-from app.modules.nodes.service import create_node
+from app.modules.nodes.service import create_node, get_nodes
 from app.modules.users.models import User
 from app.modules.workspaces.dependencies import get_workspace_member
 
@@ -30,6 +30,23 @@ def create(
 ):
     try:
         return create_node(workspace_id, data, db)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
+
+@router.get("", response_model=list[NodeResponse])
+
+def list_nodes(
+    workspace_id: UUID,
+    parent_id: UUID | None = None,
+    _membership=Depends(get_workspace_member),
+    db: Session = Depends(get_db),
+):
+    try:
+        return get_nodes(workspace_id, parent_id, db)
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -37,3 +37,32 @@ def create_node(
     db.refresh(node)
 
     return node
+
+def get_nodes(
+        workspace_id: UUID,
+        parent_id: UUID | None,
+        db: Session
+) -> list[Node]:
+    
+    if parent_id is not None:
+        parent = db.scalar(
+            select(Node).where(
+                Node.id == parent_id,
+                Node.workspace_id == workspace_id,
+            )
+        )
+
+        if parent is None:
+            raise ValueError("Parent node not found")
+
+
+    statement = (
+        select(Node)
+        .where(
+            Node.workspace_id == workspace_id,
+            Node.parent_id == parent_id,
+        )
+        .order_by(Node.sort_order, Node.created_at)
+    )
+
+    return list(db.scalars(statement).all())
