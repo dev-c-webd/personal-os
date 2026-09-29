@@ -66,3 +66,16 @@ def get_nodes(
     )
 
     return list(db.scalars(statement).all())
+
+
+def get_node_by_id(
+    workspace_id: UUID,
+    node_id: UUID,
+    db: Session,
+) -> Node | None:
+    statement = select(Node).where(
+        Node.id == node_id,
+        Node.workspace_id == workspace_id,
+    )
+
+    return db.scalar(statement)
