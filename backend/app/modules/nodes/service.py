@@ -108,3 +108,65 @@ def update_node(
 
     return node
     
+
+def move_node(
+    workspace_id: UUID,
+    node_id: UUID,
+    new_parent_id: UUID | None,
+    db: Session,
+) -> Node:
+    node = db.scalar(
+        select(Node).where(
+            Node.id == node_id,
+            Node.workspace_id == workspace_id,
+        )
+    )
+
+    if node is None:
+        raise ValueError("Node not found")
+
+    if new_parent_id is None:
+        node.parent_id = None
+
+        db.commit()
+        db.refresh(node)
+
+        return node
+
+    new_parent = db.scalar(
+        select(Node).where(
+            Node.id == new_parent_id,
+            Node.workspace_id == workspace_id,
+        )
+    )
+
+    if new_parent is None:
+        raise ValueError("Parent node not found")
+
+    if new_parent_id == node_id:
+        raise ValueError("A node cannot be its own parent")
+
+    ancestor_id = new_parent.parent_id
+
+    while ancestor_id is not None:
+        if ancestor_id == node_id:
+            raise ValueError("Cannot move a node under its descendant")
+
+        ancestor = db.scalar(
+            select(Node).where(
+                Node.id == ancestor_id,
+                Node.workspace_id == workspace_id,
+            )
+        )
+
+        if ancestor is None:
+            raise ValueError("Invalid node hierarchy")
+
+        ancestor_id = ancestor.parent_id
+
+    node.parent_id = new_parent_id
+
+    db.commit()
+    db.refresh(node)
+
+    return node

@@ -22,3 +22,6 @@ class NodeResponse(BaseModel):
 class NodeUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=255)
     sort_order: int | None = None
+
+class MoveNodeRequest(BaseModel):
+    parent_id: UUID | None

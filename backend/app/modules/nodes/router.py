@@ -9,8 +9,8 @@ from app.modules.users.models import User
 from app.modules.auth.dependencies import get_current_user
 from app.modules.workspaces.dependencies import get_workspace_member
 
-from app.modules.nodes.schemas import NodeCreate, NodeResponse, NodeUpdate
-from app.modules.nodes.service import create_node, get_nodes, get_node_by_id, update_node
+from app.modules.nodes.schemas import NodeCreate, NodeResponse, NodeUpdate, MoveNodeRequest
+from app.modules.nodes.service import create_node, get_nodes, get_node_by_id, update_node, move_node
 
 
 router = APIRouter(
@@ -92,3 +92,25 @@ def update(
         )
 
     return node
+
+
+@router.patch("/{node_id}/move", response_model=NodeResponse)
+def move(
+    workspace_id: UUID,
+    node_id: UUID,
+    data: MoveNodeRequest,
+    _membership=Depends(get_workspace_member),
+    db: Session = Depends(get_db),
+):
+    try:
+        return move_node(
+            workspace_id,
+            node_id,
+            data.parent_id,
+            db,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
