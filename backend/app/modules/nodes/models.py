@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import ( DateTime, ForeignKey, ForeignKeyConstraint, Integer, String, UniqueConstraint )
+from sqlalchemy import ( DateTime, ForeignKey, ForeignKeyConstraint, Integer, String, UniqueConstraint, Index )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -66,4 +66,9 @@ class Node(Base):
             ["workspace_id", "parent_id"],
             ["nodes.workspace_id", "nodes.id"],
         ),
+        Index(
+            "ix_nodes_workspace_parent",
+            "workspace_id",
+            "parent_id",
+        )
     )
