@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 
 from app.modules.nodes.models import Node
@@ -170,3 +170,36 @@ def move_node(
     db.refresh(node)
 
     return node
+
+
+def delete_node(
+    workspace_id: UUID,
+    node_id: UUID,
+    db: Session,
+) -> bool:
+    descendants = (
+        select(Node.id)
+        .where(
+            Node.id == node_id,
+            Node.workspace_id == workspace_id,
+        )
+        .cte(name="node_tree", recursive=True)
+    )
+
+    descendants = descendants.union_all(
+        select(Node.id)
+        .where(
+            Node.parent_id == descendants.c.id,
+            Node.workspace_id == workspace_id,
+        )
+    )
+
+    statement = delete(Node).where(
+        Node.workspace_id == workspace_id,
+        Node.id.in_(select(descendants.c.id)),
+    )
+
+    result = db.execute(statement)
+    db.commit()
+
+    return result.rowcount > 0

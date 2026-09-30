@@ -10,7 +10,7 @@ from app.modules.auth.dependencies import get_current_user
 from app.modules.workspaces.dependencies import get_workspace_member
 
 from app.modules.nodes.schemas import NodeCreate, NodeResponse, NodeUpdate, MoveNodeRequest
-from app.modules.nodes.service import create_node, get_nodes, get_node_by_id, update_node, move_node
+from app.modules.nodes.service import create_node, get_nodes, get_node_by_id, update_node, move_node, delete_node
 
 
 router = APIRouter(
@@ -114,3 +114,19 @@ def move(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc
+
+
+@router.delete("/{node_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete(
+    workspace_id: UUID,
+    node_id: UUID,
+    _membership=Depends(get_workspace_member),
+    db: Session = Depends(get_db),
+):
+    deleted = delete_node(workspace_id, node_id, db)
+
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Node not found",
+        )
