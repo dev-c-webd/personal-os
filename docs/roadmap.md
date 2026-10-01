@@ -273,45 +273,121 @@ The service has been import-tested.
 
 This phase still needs the normal repository checkpoint before being considered fully synchronized with GitHub.
 
-6.4.4 Placement service
+# 6.4 Component System ✅
 
-Planned.
+The Component System foundation is implemented and API-tested.
 
-Responsibilities:
+---
 
-create placements
-retrieve placements
-update placements
-move placements
-delete placements
-validate Page ownership
-validate Component ownership
-validate parent placement ownership
-prevent invalid placement hierarchies
-6.4.5 Component API
+## 6.4.1 Component models + database ✅
 
-Planned.
+Implemented:
 
-Expected API areas:
+- `components`
+- `component_placements`
+- UUID identifiers
+- workspace ownership
+- workspace-aware composite foreign keys
+- cascade relationships
+- flexible JSONB configuration
 
-Component CRUD
-Placement CRUD
-Page component/placement retrieval
-workspace authorization
-6.4.6 Component tests
+---
 
-Planned.
+## 6.4.2 Component schemas ✅
 
-Important cases:
+Implemented:
 
-workspace isolation
-component CRUD
-placement CRUD
-invalid Page references
-invalid Component references
-invalid parent placement
-deletion cascades
-authorization
+- `ComponentCreate`
+- `ComponentUpdate`
+- `ComponentResponse`
+- `ComponentPlacementCreate`
+- `ComponentPlacementUpdate`
+- `ComponentPlacementResponse`
+
+---
+
+## 6.4.3 Component service ✅
+
+Implemented:
+
+- create Component
+- list Components
+- retrieve Component
+- update Component
+- delete Component
+
+Workspace scoping is enforced by the service.
+
+PATCH behavior correctly distinguishes omitted fields from explicitly provided `null` values where clearing is supported.
+
+---
+
+## 6.4.4 Placement service ✅
+
+Implemented:
+
+- create Placement
+- list Placements for a Page
+- retrieve Placement
+- update Placement
+- delete Placement
+- Page validation
+- Component validation
+- same-Page parent validation
+- workspace scoping
+- nested Placement hierarchy
+- move Placement to Page root
+- self-parent protection
+- descendant-cycle protection
+- recursive CTE cycle detection
+
+PATCH behavior supports:
+
+```text
+parent omitted
+    → keep existing parent
+
+parent = UUID
+    → assign parent
+
+parent = null
+    → move to Page root
+    
+# 6.4.5 Component + Placement API ✅
+
+Implemented API endpoints for:
+
+Components
+POST   /api/v1/workspaces/{workspace_id}/components
+GET    /api/v1/workspaces/{workspace_id}/components
+GET    /api/v1/workspaces/{workspace_id}/components/{component_id}
+PATCH  /api/v1/workspaces/{workspace_id}/components/{component_id}
+DELETE /api/v1/workspaces/{workspace_id}/components/{component_id}
+Placements
+POST   /api/v1/workspaces/{workspace_id}/components/placements
+GET    /api/v1/workspaces/{workspace_id}/components/placements
+GET    /api/v1/workspaces/{workspace_id}/components/placements/{placement_id}
+PATCH  /api/v1/workspaces/{workspace_id}/components/placements/{placement_id}
+DELETE /api/v1/workspaces/{workspace_id}/components/placements/{placement_id}
+
+All endpoints use workspace membership authorization.
+
+API behavior tested:
+
+Component creation
+Component listing
+Component updating
+Component deletion
+Placement creation
+Placement listing
+nested Placements
+moving nested Placement to root
+self-parent rejection
+descendant-cycle rejection
+Placement subtree cascade deletion
+read-after-delete behavior
+nullable PATCH field semantics
+
 7. Automated Testing
 
 Planned.
