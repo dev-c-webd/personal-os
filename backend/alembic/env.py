@@ -9,6 +9,7 @@ from app.modules.users.models import User  # noqa:F401
 from app.modules.workspaces.models import Workspace  # noqa: F401
 from app.modules.workspaces.membership_models import WorkspaceMember  # noqa: F401
 from app.modules.nodes.models import Node  # noqa: F401
+from app.modules.nodes.page_settings_models import PageSettings
 
 config = context.config
 
