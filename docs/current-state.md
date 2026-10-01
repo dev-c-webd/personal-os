@@ -2,7 +2,7 @@
 
 This document records the actual implementation state of the Personal OS repository.
 
-It should describe what exists in the codebase and database, not merely what is planned.
+It describes what currently exists, what has been tested, and what remains planned or deferred.
 
 ---
 
@@ -10,15 +10,11 @@ It should describe what exists in the codebase and database, not merely what is 
 
 Current major roadmap stage:
 
-**Roadmap 6 — Personal OS Resources**
+**Roadmap 7 — Automated Testing**
 
-Current sub-phase:
+Completed immediately before this stage:
 
-**6.4 — Component System**
-
-Current implementation point:
-
-**6.4.3 — Component service**
+**Roadmap 6 → 6.4 — Component System**
 
 ---
 
@@ -33,7 +29,7 @@ personal-os/
 └── README.md
 Backend
 
-Backend stack currently includes:
+Current backend stack:
 
 Python
 FastAPI
@@ -44,21 +40,21 @@ Pydantic
 JWT authentication
 Argon2 password hashing
 uv for Python dependency/environment management
-API Structure
+API
 
-The API uses versioned routes:
+The API uses:
 
 /api/v1/...
 
-Existing major API areas include:
+Current major API areas include:
 
-/auth
-/users
-/workspaces
-/workspaces/{workspace_id}/nodes
-
-Page-related functionality is currently represented through the existing nodes API.
-
+authentication
+users
+workspaces
+Pages through the nodes API
+Page settings
+Components
+Component Placements
 Authentication
 
 Implemented:
@@ -74,13 +70,11 @@ Authorization foundation:
 workspace membership
 workspace-scoped access control
 
-Workspace operations use membership verification before protected operations are performed.
+Protected workspace resources use workspace membership verification.
 
 Database
 
-Current PostgreSQL database contains the foundational application tables and the evolving Personal OS data model.
-
-Core tables implemented:
+Current core tables:
 
 users
 workspaces
@@ -89,9 +83,18 @@ nodes
 page_settings
 components
 component_placements
-User
 
-The User model currently contains:
+PostgreSQL is the database.
+
+UUIDs are used for primary identifiers.
+
+Relational structures are used for important identity, ownership, and relationships.
+
+JSONB is used for flexible configuration.
+
+Users
+
+The User model contains:
 
 UUID id
 username
@@ -99,24 +102,24 @@ email
 password hash
 created timestamp
 updated timestamp
-Workspace
+Workspaces
 
-The Workspace model currently contains:
+The Workspace model contains:
 
 UUID id
 name
 created timestamp
 updated timestamp
 
-A user can belong to multiple workspaces.
+A User can belong to multiple Workspaces.
 
-Registration does not automatically create a workspace.
+Registration does not automatically create a Workspace.
 
 Workspace Membership
 
-Workspace membership is represented separately from User and Workspace.
+Workspace membership connects Users and Workspaces.
 
-Current membership information includes:
+Current information includes:
 
 UUID id
 workspace_id
@@ -126,11 +129,11 @@ created timestamp
 
 A unique user/workspace relationship is enforced.
 
-Workspace membership is also the current authorization boundary.
+Workspace membership is the current primary authorization boundary.
 
 Pages
 
-Pages are currently represented by the nodes database table.
+Pages are currently represented by the historical nodes table.
 
 A Page contains:
 
@@ -142,42 +145,33 @@ sort_order
 created timestamp
 updated timestamp
 
-Pages no longer have a fixed semantic type.
-
-The system therefore does NOT currently classify Pages as:
-
-folders
-files
-notes
-tasks
-goals
+Pages no longer have a semantic type.
 
 A Page is a universal hierarchical container.
 
 Page Hierarchy
 
-Pages support:
+Implemented:
 
 unlimited nesting
 top-level Pages
 child Pages
-moving Pages
-moving Pages back to the workspace root
+Page movement
+moving Pages back to workspace root
 sibling ordering
-
-Database-level protection ensures a Page cannot reference a parent from another workspace.
-
-Application-level recursive logic prevents cycles.
+workspace-aware parent protection
+application-level cycle prevention
+recursive subtree deletion
 
 Deleting a Page currently deletes its descendant subtree.
 
 Page Settings
 
-Page customization is represented separately through:
+Implemented through:
 
 page_settings
 
-Current configuration sections:
+Configuration sections:
 
 appearance
 layout_config
@@ -185,34 +179,31 @@ behavior_config
 
 These are stored as PostgreSQL JSONB.
 
-The settings record is associated one-to-one with a Page.
-
-Current API behavior:
+Implemented behavior:
 
 GET settings
 PATCH settings
 lazy creation of default settings
-workspace authorization
 Page existence validation
-
-A newly accessed Page can receive default settings:
-
-{
-  "appearance": {},
-  "layout_config": {},
-  "behavior_config": {}
-}
+workspace authorization
 Component System
 
-The Component system is currently being implemented.
-
-The current database contains:
+The Component System is implemented through:
 
 components
 component_placements
-Component
 
-A Component represents a reusable UI/data presentation concept.
+The system is designed around:
+
+Component
+    +
+Placement
+    =
+Component appearing on a Page
+
+A Component can have multiple Placements.
+
+Components
 
 Current fields include:
 
@@ -226,44 +217,21 @@ updated_at
 
 definition_key is a string rather than a database enum.
 
-Examples of future definition keys could include:
+config uses JSONB.
 
-text
-image
-task-card
-table
-chart
-file
+binding uses JSONB.
 
-These examples are conceptual and are not all implemented yet.
+Component operations implemented:
 
-Component Configuration
+create
+list
+retrieve
+update
+delete
 
-config is stored as JSONB.
-
-This allows component-specific configuration without requiring a new database column for every possible UI option.
-
-Component Binding
-
-binding is stored as JSONB.
-
-It is intended to connect a Component to underlying data or another application capability.
-
-Examples of future bindings could reference:
-
-tasks
-assets
-people
-events
-views
-
-The generic binding system is currently only foundational; those domain entities are not all implemented yet.
+All operations are workspace-scoped.
 
 Component Placement
-
-A Component and its Placement are separate concepts.
-
-A Placement describes how a Component is used on a particular Page.
 
 Current fields include:
 
@@ -282,70 +250,94 @@ sort_order
 created_at
 updated_at
 
-The flexible visual properties use JSONB.
+Flexible visual/configuration fields use JSONB.
 
 Placement Hierarchy
 
-Placements can have parent placements.
+Implemented:
 
-This allows Components to eventually be nested inside containers/components.
+root Placements
+nested Placements
+Page-level Placement listing
+parent Placement validation
+same-Page parent validation
+workspace isolation
+self-parent protection
+descendant-cycle protection
+recursive CTE cycle detection
+moving a Placement back to Page root
+cascade deletion of child Placements
 
-The database uses workspace-aware composite foreign keys so that:
+PATCH semantics distinguish between:
 
-a Placement cannot point to a Page in another workspace
-a Placement cannot point to a Component in another workspace
-a Placement cannot point to a parent Placement in another workspace
+field omitted
+    → leave existing value unchanged
+
+field = UUID
+    → assign value
+
+field = null
+    → explicitly clear nullable relationship/value
+
+This behavior is implemented for the relevant nullable fields.
+
 Component Schemas
 
-Currently implemented:
+Implemented:
 
 ComponentCreate
 ComponentUpdate
 ComponentResponse
-
 ComponentPlacementCreate
 ComponentPlacementUpdate
 ComponentPlacementResponse
 
-Schemas use UUIDs and Pydantic validation.
+Schemas use Pydantic validation and UUID identifiers.
 
-Flexible configuration fields use dictionaries compatible with JSON data.
+Component API
 
-Component Service
+Implemented Component endpoints:
 
-Current Component service functionality:
+POST   /api/v1/workspaces/{workspace_id}/components
+GET    /api/v1/workspaces/{workspace_id}/components
+GET    /api/v1/workspaces/{workspace_id}/components/{component_id}
+PATCH  /api/v1/workspaces/{workspace_id}/components/{component_id}
+DELETE /api/v1/workspaces/{workspace_id}/components/{component_id}
 
-create_component
-get_components
-get_component_by_id
-update_component
-delete_component
+Implemented Placement endpoints:
 
-All operations are workspace-scoped.
+POST   /api/v1/workspaces/{workspace_id}/components/placements
+GET    /api/v1/workspaces/{workspace_id}/components/placements
+GET    /api/v1/workspaces/{workspace_id}/components/placements/{placement_id}
+PATCH  /api/v1/workspaces/{workspace_id}/components/placements/{placement_id}
+DELETE /api/v1/workspaces/{workspace_id}/components/placements/{placement_id}
 
-The service has been import-tested.
+All endpoints use workspace membership authorization.
 
-Placement service and Component API routes have not yet been implemented in the current phase.
+Component System Testing Status
 
-Important Architectural Distinctions
-Page
+Manual API behavior has been verified for:
 
-Represents the universal environment/container in the user's hierarchy.
+Component creation
+Component listing
+Component update
+Component deletion
+read-after-delete
+root Placement creation
+Placement listing
+nested Placement creation
+nested-to-root movement
+self-parent rejection
+descendant-cycle rejection
+Placement subtree cascade deletion
+nullable PATCH behavior
 
-Component
+Automated regression testing is intentionally the next major roadmap phase.
 
-Represents a reusable thing that can be presented.
-
-Placement
-
-Represents where and how a Component is placed on a Page.
-
-Underlying Data
-
-The long-term design allows Components to represent or display actual domain entities without making those entities into Page types.
-
-Implemented vs Planned
 Implemented
+
+The current implementation includes:
+
 FastAPI backend
 PostgreSQL
 SQLAlchemy
@@ -363,12 +355,16 @@ Page settings
 Component models
 Component database migration
 Component schemas
-initial Component service
-Not yet implemented
+Component service
 Placement service
 Component API
 Placement API
-automated Component tests
+manual API behavior testing
+Not Yet Implemented
+
+The following are planned but not yet implemented:
+
+automated testing suite
 Asset entity
 object/file storage
 Task entity
@@ -387,9 +383,6 @@ queues/background jobs
 Kubernetes
 production AI infrastructure
 Important Deferred Decisions
-
-The following have intentionally been left for later instead of being prematurely implemented:
-
 Assets
 
 File metadata should eventually live in PostgreSQL while file bytes can live in object storage.
@@ -404,11 +397,11 @@ Views should provide different presentations of the same underlying data.
 
 Knowledge
 
-Knowledge should support multiple scopes and work as a lens over underlying application data.
+Knowledge should support multiple scopes and work as a lens over underlying information.
 
 Activity
 
-Activity/event tracking should remain separate from the knowledge system.
+Activity/event tracking should remain separate from the Knowledge system.
 
 AI
 
@@ -424,14 +417,16 @@ MCP should be treated as an integration boundary rather than the foundation of t
 
 Plugins
 
-Arbitrary user code should not be introduced early. A controlled component/plugin system can be added later.
+Arbitrary user code should not be introduced early. A controlled plugin/component system can be added later.
 
 Documentation Status
 
-The documentation is currently being migrated from the earlier Node/type-based design to the current universal Page + Component architecture.
+The primary architecture documentation has been synchronized with the current universal Page + Component architecture.
 
-The following documents require synchronization with the current architecture:
+Current core documentation:
 
+docs/roadmap.md
+docs/current-state.md
 docs/architecture.md
 docs/database-design.md
 
@@ -449,7 +444,7 @@ docs/changelog.md
 docs/decisions/
 Source of Truth
 
-The repository documentation should eventually become the durable source of truth for:
+The repository documentation is the durable source of truth for:
 
 architecture
 roadmap
