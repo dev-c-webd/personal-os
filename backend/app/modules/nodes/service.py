@@ -4,7 +4,6 @@ from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 
 from app.modules.nodes.models import Node
-from app.modules.workspaces.models import Workspace
 from app.modules.nodes.schemas import NodeCreate, NodeUpdate
 
 def create_node(
@@ -28,7 +27,6 @@ def create_node(
         workspace_id=workspace_id,
         parent_id=data.parent_id,
         name=data.name,
-        type=data.type,
         sort_order=data.sort_order,
     )
 

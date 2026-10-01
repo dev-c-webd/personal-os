@@ -5,8 +5,6 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 
-from app.modules.users.models import User
-from app.modules.auth.dependencies import get_current_user
 from app.modules.workspaces.dependencies import get_workspace_member
 
 from app.modules.nodes.schemas import NodeCreate, NodeResponse, NodeUpdate, MoveNodeRequest
@@ -28,7 +26,6 @@ def create(
     workspace_id: UUID,
     data: NodeCreate,
     _membership=Depends(get_workspace_member),
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     try:
