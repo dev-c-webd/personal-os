@@ -32,11 +32,6 @@ class Node(Base):
         nullable=False,
     )
 
-    type: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-    )
-
     sort_order:Mapped[int] = mapped_column(
         Integer,
         nullable=False,
