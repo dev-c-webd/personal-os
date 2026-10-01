@@ -73,7 +73,7 @@ def update_component(
     if data.config is not None:
         component.config = data.config
 
-    if data.binding is not None:
+    if "binding" in data.model_fields_set:
         component.binding = data.binding
 
     db.commit()

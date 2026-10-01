@@ -229,7 +229,7 @@ def update_placement(
 
         placement.parent_placement_id = data.parent_placement_id
 
-    if data.slot_key is not None:
+    if "slot_key" in data.model_fields_set:
         placement.slot_key = data.slot_key
 
     if data.position is not None:
