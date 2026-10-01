@@ -146,23 +146,31 @@ def move_node(
     if new_parent_id == node_id:
         raise ValueError("A node cannot be its own parent")
 
-    ancestor_id = new_parent.parent_id
-
-    while ancestor_id is not None:
-        if ancestor_id == node_id:
-            raise ValueError("Cannot move a node under its descendant")
-
-        ancestor = db.scalar(
-            select(Node).where(
-                Node.id == ancestor_id,
-                Node.workspace_id == workspace_id,
-            )
+    ancestor_tree = (
+        select(Node.id, Node.parent_id)
+        .where(
+            Node.id == new_parent_id,
+            Node.workspace_id == workspace_id,
         )
+        .cte(name="ancestor_tree", recursive=True)
+    )
 
-        if ancestor is None:
-            raise ValueError("Invalid node hierarchy")
+    ancestor_tree = ancestor_tree.union_all(
+        select(Node.id, Node.parent_id)
+        .where(
+            Node.id == ancestor_tree.c.parent_id,
+            Node.workspace_id == workspace_id,
+        )
+    )
 
-        ancestor_id = ancestor.parent_id
+    cycle_exists = db.scalar(
+        select(ancestor_tree.c.id).where(
+            ancestor_tree.c.id == node_id
+        )
+    )
+
+    if cycle_exists is not None:
+        raise ValueError("Cannot move a node under its descendant")
 
     node.parent_id = new_parent_id
 
