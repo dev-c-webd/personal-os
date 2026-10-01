@@ -187,47 +187,46 @@ def update_placement(
             if parent_placement.page_id != placement.page_id:
                 raise ValueError(
                     "Parent placement must belong to the same Page"
+                )
+
+            ancestor_tree = (
+                select(
+                    ComponentPlacement.id,
+                    ComponentPlacement.parent_placement_id,
+                )
+                .where(
+                    ComponentPlacement.id == data.parent_placement_id,
+                    ComponentPlacement.workspace_id == workspace_id,
+                )
+                .cte(
+                    name="placement_ancestor_tree",
+                    recursive=True,
+                )
             )
 
-        ancestor_tree = (
-            select(
-                ComponentPlacement.id,
-                ComponentPlacement.parent_placement_id,
-            )
-            .where(
-                ComponentPlacement.id == data.parent_placement_id,
-                ComponentPlacement.workspace_id == workspace_id,
-            )
-            .cte(
-                name="placement_ancestor_tree",
-                recursive=True,
-            )
-        )
-
-        ancestor_tree = ancestor_tree.union_all(
-            select(
-                ComponentPlacement.id,
-                ComponentPlacement.parent_placement_id,
-            )
-            .where(
-                ComponentPlacement.id
-                == ancestor_tree.c.parent_placement_id,
-                ComponentPlacement.workspace_id == workspace_id,
-            )
-        )
-
-        cycle_exists = db.scalar(
-            select(ancestor_tree.c.id).where(
-                ancestor_tree.c.id == placement_id
-            )
-        )
-
-        if cycle_exists is not None:
-            raise ValueError(
-                "Cannot move a placement under its descendant"
+            ancestor_tree = ancestor_tree.union_all(
+                select(
+                    ComponentPlacement.id,
+                    ComponentPlacement.parent_placement_id,
+                )
+                .where(
+                    ComponentPlacement.id
+                    == ancestor_tree.c.parent_placement_id,
+                    ComponentPlacement.workspace_id == workspace_id,
+                )
             )
 
-    if "parent_placement_id" in data.model_fields_set:
+            cycle_exists = db.scalar(
+                select(ancestor_tree.c.id).where(
+                    ancestor_tree.c.id == placement_id
+                )
+            )
+
+            if cycle_exists is not None:
+                raise ValueError(
+                    "Cannot move a placement under its descendant"
+                )
+
         placement.parent_placement_id = data.parent_placement_id
 
     if data.slot_key is not None:
