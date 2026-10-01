@@ -7,9 +7,22 @@ from app.db.database import get_db
 
 from app.modules.workspaces.dependencies import get_workspace_member
 
-from app.modules.nodes.schemas import NodeCreate, NodeResponse, NodeUpdate, MoveNodeRequest
-from app.modules.nodes.service import create_node, get_nodes, get_node_by_id, update_node, move_node, delete_node
+# nodes(pages now) import
+from app.modules.nodes.schemas import ( NodeCreate, NodeResponse, NodeUpdate, MoveNodeRequest )
+from app.modules.nodes.service import ( create_node, get_nodes, get_node_by_id, update_node, move_node, delete_node )
 
+# page settings imports
+from app.modules.nodes.page_settings_schemas import (
+    PageSettingsResponse,
+    PageSettingsUpdate,
+)
+from app.modules.nodes.page_settings_service import (
+    get_or_create_page_settings,
+    update_page_settings,
+)
+
+
+# nodes (now pages) routes
 
 router = APIRouter(
     prefix="/api/v1/workspaces/{workspace_id}/nodes",
@@ -127,3 +140,57 @@ def delete(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Node not found",
         )
+
+
+# page setting routes
+
+@router.get(
+    "/{page_id}/settings",
+    response_model=PageSettingsResponse,
+)
+def get_settings(
+    workspace_id: UUID,
+    page_id: UUID,
+    db: Session = Depends(get_db),
+    _membership=Depends(get_workspace_member),
+):
+    settings = get_or_create_page_settings(
+        workspace_id=workspace_id,
+        page_id=page_id,
+        db=db,
+    )
+
+    if settings is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Page not found",
+        )
+
+    return settings
+
+
+@router.patch(
+    "/{page_id}/settings",
+    response_model=PageSettingsResponse,
+)
+def update_settings(
+    workspace_id: UUID,
+    page_id: UUID,
+    data: PageSettingsUpdate,
+    db: Session = Depends(get_db),
+    _membership=Depends(get_workspace_member),
+):
+    settings = update_page_settings(
+        workspace_id=workspace_id,
+        page_id=page_id,
+        data=data,
+        db=db,
+    )
+
+    if settings is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Page not found",
+        )
+
+    return settings
