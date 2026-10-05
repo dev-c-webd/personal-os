@@ -130,7 +130,7 @@ Instead, those concepts can later be represented by actual domain objects, compo
 
 ---
 
-# 6. Personal OS Resources ← CURRENT
+# 6. Personal OS Resources ✅
 
 This is the main product architecture phase.
 
@@ -212,7 +212,7 @@ Avoid continuously expanding the Page table with appearance and behavior fields.
 
 Flexible configuration belongs in JSONB while the Page's core identity remains relational.
 
-6.4 Component System ← CURRENT
+6.4 Component System ✅
 
 Components are intended to become the foundation for customizable UI.
 
@@ -388,27 +388,29 @@ Placement subtree cascade deletion
 read-after-delete behavior
 nullable PATCH field semantics
 
-7. Automated Testing
 
-Planned.
+## 7. Automated Testing ✅
 
-Scope:
+Completed:
 
-Testing coverage currently includes:
+7.1 Test infrastructure ✅
+7.2 Database/service integration testing ✅
+7.3 API testing ✅
+7.4 Authentication & authorization testing ✅
 
-unit/schema tests
-database integration tests
-service tests
-API tests
-authentication tests
-authorization tests
-workspace isolation tests
-hierarchy/invariant tests
-migration/database verification
-regression coverage
+Current automated suite:
 
-automated regression testing is intentionally the next major roadmap phase
-Testing becomes increasingly important as the application gains more modules.
+31 tests passing.
+
+Coverage includes:
+- schema/unit tests
+- database integration tests
+- service tests
+- API tests
+- authentication
+- authorization
+- workspace isolation
+- hierarchy/invariant testing
 
 8. Docker / Containerization
 

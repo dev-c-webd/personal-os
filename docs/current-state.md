@@ -23,8 +23,6 @@ Roadmap 7 — Automated Testing ✅
 
 Automated test suite: 31 tests passing.
 
-Automated test suite: 23 tests passing.
-
 **Roadmap 6 → 6.4 — Component System**
 
 ---
@@ -343,7 +341,6 @@ descendant-cycle rejection
 Placement subtree cascade deletion
 nullable PATCH behavior
 
-Automated regression testing is intentionally the next major roadmap phase.
 
 Implemented
 
@@ -378,7 +375,6 @@ Not Yet Implemented
 
 The following are planned but not yet implemented:
 
-automated testing suite
 Asset entity
 object/file storage
 Task entity
