@@ -14,10 +14,14 @@ Current major roadmap stage:
 
 Completed immediately before this stage:
 
-Roadmap 7 — Automated Testing
+Roadmap 7 — Automated Testing ✅
+
 7.1 Test infrastructure ✅
 7.2 Database/service integration testing ✅
 7.3 API testing ✅
+7.4 Authentication & authorization testing ✅
+
+Automated test suite: 31 tests passing.
 
 Automated test suite: 23 tests passing.
 
@@ -367,6 +371,9 @@ Placement service
 Component API
 Placement API
 manual API behavior testing
+
+# It should instead say that automated testing is implemented through 31 passing tests, while the remaining testing work is future expansion as new modules are introduced.
+
 Not Yet Implemented
 
 The following are planned but not yet implemented:

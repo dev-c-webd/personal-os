@@ -394,15 +394,20 @@ Planned.
 
 Scope:
 
-unit tests
-service tests
-API tests ✅
-database integration tests
-authorization tests
-hierarchy tests
-migration verification
-regression tests
+Testing coverage currently includes:
 
+unit/schema tests
+database integration tests
+service tests
+API tests
+authentication tests
+authorization tests
+workspace isolation tests
+hierarchy/invariant tests
+migration/database verification
+regression coverage
+
+automated regression testing is intentionally the next major roadmap phase
 Testing becomes increasingly important as the application gains more modules.
 
 8. Docker / Containerization
