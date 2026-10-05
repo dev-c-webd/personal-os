@@ -14,6 +14,13 @@ Current major roadmap stage:
 
 Completed immediately before this stage:
 
+Roadmap 7 — Automated Testing
+7.1 Test infrastructure ✅
+7.2 Database/service integration testing ✅
+7.3 API testing ✅
+
+Automated test suite: 23 tests passing.
+
 **Roadmap 6 → 6.4 — Component System**
 
 ---

@@ -396,7 +396,7 @@ Scope:
 
 unit tests
 service tests
-API tests
+API tests ✅
 database integration tests
 authorization tests
 hierarchy tests
