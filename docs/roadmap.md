@@ -397,10 +397,11 @@ Completed:
 7.2 Database/service integration testing ✅
 7.3 API testing ✅
 7.4 Authentication & authorization testing ✅
+7.5 Hierarchy, invariants & regression testing ✅
 
 Current automated suite:
 
-31 tests passing.
+37 tests passing.
 
 Coverage includes:
 - schema/unit tests

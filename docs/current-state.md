@@ -21,7 +21,19 @@ Roadmap 7 — Automated Testing ✅
 7.3 API testing ✅
 7.4 Authentication & authorization testing ✅
 
-Automated test suite: 31 tests passing.
+Automated test suite: 37 tests passing.
+
+Current testing coverage includes:
+- schema/unit tests
+- database integration tests
+- service tests
+- API tests
+- authentication
+- authorization
+- workspace isolation
+- hierarchy invariants
+- recursive deletion behavior
+- regression coverage
 
 **Roadmap 6 → 6.4 — Component System**
 
